@@ -10,7 +10,10 @@ const login = () => {
   const dispatch = useDispatch();
   const [emailId, setemailId] = useState("");
   const [password, setPassword] = useState("");
+const [error, setError] = useState("");
+
   const handleLogin = async() => {
+    setError("");
     try{
       const res = await axiosClient.post("/login",{
         emailId,
@@ -18,12 +21,13 @@ const login = () => {
       })
       dispatch(addUser(res.data.user));
       navigate("/");
-      console.log(res.data);
-      
     }
-catch(err) {
+  catch(err) {
     console.log("Login Error:", err.response?.data);
-}
+    setError(
+      err.response?.data || "Something went wrong"
+    );
+  }
   }
   return (
     <div className='flex justify-center items-center min-h-screen'>
@@ -40,6 +44,7 @@ catch(err) {
   <input type="password" className="input" placeholder="Enter Password" value = {password} onChange={(e) => setPassword(e.target.value)} />
 </fieldset>
     <div className="mt-6">
+      {error && <p className="py-1">{error}</p>}
       <button className="btn btn-primary btn-block" onClick={handleLogin} >Login</button>
     </div>
   </div>
