@@ -3,6 +3,7 @@ import axiosClient from '../utils/axios';
 import { useDispatch } from 'react-redux';
 import { addUser } from '../redux/userSlice';
 import { useNavigate } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 
 const login = () => {
@@ -46,6 +47,12 @@ const [error, setError] = useState("");
     <div className="mt-6">
       {error && <p className="py-1">{error}</p>}
       <button className="btn btn-primary btn-block" onClick={handleLogin} >Login</button>
+      <p className="text-center mt-4 text-sm">
+    Don't have an account?{" "}
+    <Link to="/signup" className="link link-primary">
+        Sign Up
+    </Link>
+</p>
     </div>
   </div>
 </div>

@@ -5,6 +5,9 @@ import Feed from "./components/feed"
 import { BrowserRouter, Route , Routes } from "react-router-dom"
 import Connections from "./pages/connections";
 import Requests from "./pages/requests.jsx"
+
+import Signup from "./pages/signup";
+
 function App() {
   
   return (
@@ -16,6 +19,7 @@ function App() {
         <Route path = '/login' element = {<Login/>} />
         <Route path = "/connections" element = {<Connections />} />
         <Route path="requests" element={<Requests />} />
+        <Route path="/signup" element={<Signup />} />
         </Route>
 
 
