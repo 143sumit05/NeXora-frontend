@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000",
+    baseURL: "https://nexora-backend-rkm0.onrender.com",
     withCredentials: true
 });
 
