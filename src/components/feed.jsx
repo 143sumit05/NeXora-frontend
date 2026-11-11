@@ -1,5 +1,6 @@
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import axiosClient from "../utils/axios";
 
 const Feed = () => {
@@ -8,10 +9,16 @@ const Feed = () => {
     const [nextCursor, setNextCursor] = useState(null);
     const [loading, setLoading] = useState(false);
     const [hasMore, setHasMore] = useState(true);
+    const [limitReached, setLimitReached] = useState(false);
+    const [remaining, setRemaining] = useState(null);
+
+    const loadingRef = useRef(false);
+    const hasMoreRef = useRef(true);
 
     const fetchFeed = async (cursor = null) => {
-        if (loading || !hasMore) return;
+        if (loadingRef.current || !hasMoreRef.current) return;
 
+        loadingRef.current = true;
         setLoading(true);
 
         try {
@@ -19,19 +26,25 @@ const Feed = () => {
                 `/feed?limit=10${cursor ? `&lastId=${cursor}` : ""}`
             );
 
-            const newUsers = res.data.data;
+            const newUsers = res.data.data || [];
 
-            setUsers((prev) => [...prev, ...newUsers]);
+            setUsers(prev => [...prev, ...newUsers]);
             setNextCursor(res.data.nextCursor);
+            setRemaining(res.data.remaining ?? null);
+            setLimitReached(res.data.limitReached || false);
 
-            if (newUsers.length < 10) {
-                setHasMore(false);
-            }
-        }
-        catch (err) {
-            console.log("Error fetching feed:", err);
-        }
-        finally {
+            const moreAvailable =
+                newUsers.length > 0 &&
+                !!res.data.nextCursor &&
+                !res.data.limitReached;
+
+            hasMoreRef.current = moreAvailable;
+            setHasMore(moreAvailable);
+
+        } catch (err) {
+            console.error("Feed error:", err);
+        } finally {
+            loadingRef.current = false;
             setLoading(false);
         }
     };
@@ -43,16 +56,25 @@ const Feed = () => {
     const handleRequest = async (status, toUserId) => {
         try {
             await axiosClient.post(`/request/${status}/${toUserId}`);
+        } catch (err) {
+            const message = err.response?.data;
 
-            if (currentIndex + 1 >= users.length && hasMore) {
-                setCurrentIndex((prev) => prev + 1);
-                fetchFeed(nextCursor);
+            if (
+                typeof message === "string" &&
+                message.includes("Connection request already exists")
+            ) {
+                console.log("Request already exists. Skipping profile.");
             } else {
-                setCurrentIndex((prev) => prev + 1);
+                console.error("Request failed:", err);
+                return;
             }
         }
-        catch (err) {
-            console.log("Request failed:", err);
+
+        const nextIndex = currentIndex + 1;
+        setCurrentIndex(nextIndex);
+
+        if (nextIndex >= users.length && hasMoreRef.current) {
+            await fetchFeed(nextCursor);
         }
     };
 
@@ -79,20 +101,24 @@ const Feed = () => {
                             {currentUser.firstName} {currentUser.lastName}
                         </h2>
 
-                        <p>Age: {currentUser.age}</p>
-                        <p>Gender: {currentUser.gender}</p>
+                        <p>Age: {currentUser.age || "Not provided"}</p>
+                        <p>Gender: {currentUser.gender || "Not provided"}</p>
 
                         <div className="flex gap-4 mt-4">
                             <button
                                 className="btn btn-error"
-                                onClick={() => handleRequest("ignored", currentUser._id)}
+                                onClick={() =>
+                                    handleRequest("ignored", currentUser._id)
+                                }
                             >
                                 Ignore
                             </button>
 
                             <button
                                 className="btn btn-success"
-                                onClick={() => handleRequest("interested", currentUser._id)}
+                                onClick={() =>
+                                    handleRequest("interested", currentUser._id)
+                                }
                             >
                                 Interested
                             </button>
@@ -101,10 +127,33 @@ const Feed = () => {
                 </div>
             ) : loading ? (
                 <p>Loading users...</p>
+            ) : limitReached ? (
+                <div className="card bg-base-200 shadow-xl w-full max-w-sm text-center">
+                    <div className="card-body items-center">
+                        <h2 className="card-title text-xl">
+                            Daily Limit Reached!
+                        </h2>
+
+                        <p>
+                            You've discovered 15 profiles today.
+                            Upgrade to Premium for unlimited discovery!
+                        </p>
+
+                        <Link to="/premium" className="btn btn-primary mt-3">
+                            Upgrade to Premium
+                        </Link>
+                    </div>
+                </div>
             ) : (
                 <h2 className="text-xl font-semibold">
                     No more users to discover!
                 </h2>
+            )}
+
+            {remaining !== null && !limitReached && (
+                <p className="mt-4 text-sm opacity-70">
+                    Free profiles remaining today: {remaining}
+                </p>
             )}
         </div>
     );

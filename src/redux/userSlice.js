@@ -12,10 +12,14 @@ const userSlice = createSlice({
         },
         removeUser : () => {
             return null;
-        }
+        },
+        updatePremium: (state) => {
+    state.isPremium = true;
+    state.premiumSince = new Date().toISOString();
+},
     }
 
 })
 
-export const { addUser , removeUser } = userSlice.actions;
+export const { addUser , removeUser, updatePremium } = userSlice.actions;
 export default userSlice.reducer;
