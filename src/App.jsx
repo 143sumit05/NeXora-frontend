@@ -8,6 +8,7 @@ import Connections from "./pages/connections";
 import Requests from "./pages/requests.jsx";
 import Premium from "./pages/premium";
 import Signup from "./pages/signup";
+import Chat from "./pages/chat";
 
 function App() {
     return (
@@ -16,6 +17,7 @@ function App() {
                 <Route path="/" element={<Body />}>
                     <Route index element={<Feed />} />
                     <Route path="feed" element={<Feed />} />
+                    <Route path="chat/:userId" element={<Chat />} />
                     <Route path="premium" element={<Premium />} />
                     <Route path="profile" element={<Profile />} />
                     <Route path="login" element={<Login />} />
