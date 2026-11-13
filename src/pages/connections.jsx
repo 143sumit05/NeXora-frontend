@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -38,8 +39,9 @@ const Connections = () => {
                         <div className="avatar">
                             <div className="w-16 rounded-full">
                                 <img
-                                    src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                                    alt="Profile"
+                                    src={connection.photoUrl || "https://placehold.co/100x100?text=User"}
+                                    alt={connection.firstName}
+                                    className="object-cover"
                                 />
                             </div>
                         </div>
