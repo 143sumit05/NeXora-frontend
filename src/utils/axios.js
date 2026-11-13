@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosClient = axios.create({
-    baseURL: "http://localhost:3000",
+    baseURL: "https://nexora-backend-rkm0.onrender.com",
     withCredentials: true
 });
 
