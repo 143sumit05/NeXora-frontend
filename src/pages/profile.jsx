@@ -1,56 +1,65 @@
-import { useSelector } from "react-redux";
-import { useState , useEffect } from "react";
-import { useDispatch } from "react-redux";
+
+import { useSelector, useDispatch } from "react-redux";
+import { useState, useEffect } from "react";
 import { addUser } from "../redux/userSlice";
 import axiosClient from "../utils/axios";
 
 const Profile = () => {
-  const [showToast, setShowToast] = useState(false);
-  const dispatch = useDispatch();
-  const user = useSelector((store)=> store.user);
-  const [formData, setFormData] = useState({
+    const [showToast, setShowToast] = useState(false);
+    const dispatch = useDispatch();
+    const user = useSelector((store) => store.user);
+
+    const [formData, setFormData] = useState({
         firstName: "",
-        age: "",
         lastName: "",
-        gender: ""
-      });
+        age: "",
+        gender: "",
+        photoUrl: ""
+    });
 
-      useEffect(() => {
-        if(user){
-          setFormData({
-            firstName: user.firstName || "",
-            lastName: user.lastName || "",
-            age: user.age || "",
-            gender: user.gender || ""            
-          })
+    useEffect(() => {
+        if (user) {
+            setFormData({
+                firstName: user.firstName || "",
+                lastName: user.lastName || "",
+                age: user.age || "",
+                gender: user.gender || "",
+                photoUrl: user.photoUrl || ""
+            });
         }
-      },[user])
+    }, [user]);
 
-      const handleSave = async () => {
+    const handleChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const handleSave = async () => {
         try {
-          await axiosClient.patch("/profile/edit", {
-            ...formData,
-            age: Number(formData.age)
-          });
+            const updatedData = {
+                ...formData,
+                age: Number(formData.age)
+            };
 
-          dispatch(addUser({
-            ...user,
-            ...formData,
-            age: Number(formData.age)
-          }));
-          setShowToast(true);
+            await axiosClient.patch("/profile/edit", updatedData);
 
-          setTimeout(() => {
-            setShowToast(false);
-          }, 3000);
+            dispatch(addUser({
+                ...user,
+                ...updatedData
+            }));
+
+            setShowToast(true);
+            setTimeout(() => setShowToast(false), 3000);
 
         } catch (err) {
-          console.log("Profile update failed:", err.response?.data);
+            console.log("Profile update failed:", err.response?.data);
         }
-};      
+    };
 
     return (
-        <div className="flex justify-center mt-10">
+        <div className="flex justify-center mt-10 mb-10">
             <div className="card bg-base-100 shadow-xl w-96">
                 <div className="card-body">
 
@@ -58,40 +67,74 @@ const Profile = () => {
                         Edit Profile
                     </h2>
 
+                    {/* Profile Photo Preview */}
+                    <div className="flex justify-center my-4">
+                        <img
+                            src={formData.photoUrl || "https://placehold.co/200x200?text=No+Photo"}
+                            alt="Profile Preview"
+                            className="w-32 h-32 rounded-full object-cover border-2 border-primary"
+                        />
+                    </div>
+
+                    {/* Photo URL */}
+                    <fieldset className="fieldset">
+                        <legend className="fieldset-legend">
+                            Profile Photo URL
+                        </legend>
+
+                        <input
+                            className="input input-bordered w-full"
+                            type="url"
+                            name="photoUrl"
+                            placeholder="Paste image URL"
+                            value={formData.photoUrl}
+                            onChange={handleChange}
+                        />
+                    </fieldset>
+
+                    {/* First Name */}
                     <fieldset className="fieldset">
                         <legend className="fieldset-legend">First Name</legend>
-                        <input className="input input-bordered" type="text" value = {formData.firstName}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          firstName: e.target.value
-                        })} />
+                        <input
+                            className="input input-bordered"
+                            name="firstName"
+                            value={formData.firstName}
+                            onChange={handleChange}
+                        />
                     </fieldset>
 
+                    {/* Last Name */}
                     <fieldset className="fieldset">
                         <legend className="fieldset-legend">Last Name</legend>
-                        <input className="input input-bordered" type="text"value = {formData.lastName}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          lastName: e.target.value
-                        })} />
+                        <input
+                            className="input input-bordered"
+                            name="lastName"
+                            value={formData.lastName}
+                            onChange={handleChange}
+                        />
                     </fieldset>
 
+                    {/* Age */}
                     <fieldset className="fieldset">
                         <legend className="fieldset-legend">Age</legend>
-                        <input className="input input-bordered" type="number" value = {formData.age}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          age: e.target.value
-                        })}/>
+                        <input
+                            className="input input-bordered"
+                            type="number"
+                            name="age"
+                            value={formData.age}
+                            onChange={handleChange}
+                        />
                     </fieldset>
 
+                    {/* Gender */}
                     <fieldset className="fieldset">
                         <legend className="fieldset-legend">Gender</legend>
-                        <select className="select select-bordered" value = {formData.gender}
-                        onChange={(e) => setFormData({
-                          ...formData,
-                          gender: e.target.value
-                        })} >
+                        <select
+                            className="select select-bordered"
+                            name="gender"
+                            value={formData.gender}
+                            onChange={handleChange}
+                        >
                             <option value="">Select Gender</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
@@ -99,16 +142,21 @@ const Profile = () => {
                         </select>
                     </fieldset>
 
-                    <button className="btn btn-primary mt-4" onClick={handleSave} >
+                    <button
+                        className="btn btn-primary mt-4"
+                        onClick={handleSave}
+                    >
                         Save Changes
                     </button>
-{showToast && (
-    <div className="toast toast-top toast-center ">
-        <div className="alert alert-success">
-            <span>Profile changes saved successfully!</span>
-        </div>
-    </div>
-)}
+
+                    {showToast && (
+                        <div className="toast toast-top toast-center">
+                            <div className="alert alert-success">
+                                <span>Profile updated successfully!</span>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
             </div>
         </div>

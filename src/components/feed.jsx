@@ -89,11 +89,11 @@ const Feed = () => {
             {currentUser ? (
                 <div className="card bg-base-200 w-80 shadow-xl">
                     <figure className="px-4 pt-4">
-                        <img
-                            src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
-                            alt="Profile"
-                            className="rounded-xl w-full h-64 object-cover"
-                        />
+<img
+    src={currentUser.photoUrl || "https://placehold.co/400x400?text=No+Photo"}
+    alt={currentUser.firstName}
+    className="rounded-xl w-full h-64 object-cover"
+/>
                     </figure>
 
                     <div className="card-body items-center text-center">
