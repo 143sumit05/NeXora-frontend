@@ -5,7 +5,7 @@ let socket;
 
 export const connectSocket = () => {
     if (!socket) {
-        socket = io("https://nexora-backend-rkm0.onrender.com", {
+        socket = io("http://localhost:3000", {
             withCredentials: true,
             autoConnect: false
         });
